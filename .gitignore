@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+node_modules/
+bot.log
+.bot.lock
+.bot-service.pid
+npm-debug.log*
