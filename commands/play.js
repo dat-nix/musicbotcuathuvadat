@@ -73,7 +73,15 @@ async function execute(interaction, player) {
       nodeOptions: {
         metadata: interaction.channel,
         volume: 100,
-        defaultFFmpegFilters: ['normalizer'],
+        // Keep the signal flat: no compressor, EQ, resampling, or FFmpeg filters.
+        // Volume remains enabled for the /volume command.
+        disableEqualizer: true,
+        disableFilterer: true,
+        disableBiquad: true,
+        disableResampler: true,
+        disableCompressor: true,
+        disableReverb: true,
+        disableSeeker: true,
         bufferingTimeout: 30_000,
         selfDeaf: true,
         leaveOnEmpty: true,

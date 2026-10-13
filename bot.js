@@ -9,9 +9,15 @@ const {
 const { Player } = require('discord-player');
 const { DefaultExtractors } = require('@discord-player/extractor');
 const { YoutubeExtractor } = require('discord-player-youtubei');
+const { OpusEncoder: PlayerOpusEncoder, setLibopusProvider } = require('@discord-player/opus');
+const { OpusEncoder } = require('@discordjs/opus');
 const fs = require('node:fs');
 const path = require('node:path');
 require('dotenv').config();
+
+// Use libopus' supported encoder controls; the auto-selected mediaplex backend
+// does not implement the bitrate controls used by discord-player.
+setLibopusProvider(OpusEncoder, '@discordjs/opus');
 
 if (!process.env.BOT_TOKEN || !process.env.APPLICATION_ID) {
   throw new Error('Set BOT_TOKEN and APPLICATION_ID in the .env file.');
@@ -81,7 +87,12 @@ client.on('error', (error) => console.error('Discord client error:', error));
 player.events.on('error', (_queue, error) => console.error('Music player error:', error));
 player.events.on('playerStart', (queue, track) => {
   const bitrate = queue.channel?.bitrate;
-  console.log(`Playing "${track.title}"${bitrate ? `; voice channel bitrate is ${Math.round(bitrate / 1000)} kbps` : ''}.`);
+  try {
+    queue.node.setBitrate('auto');
+  } catch (error) {
+    console.error('Could not set Opus bitrate:', error.message);
+  }
+  console.log(`Playing "${track.title}"${bitrate ? `; Opus target follows the ${Math.round(bitrate / 1000)} kbps voice-channel limit` : ''}.`);
   queue.metadata?.send(`▶️ Now playing: **${track.title}**`).catch((error) => {
     console.error('Could not post now-playing message:', error.message);
   });
@@ -111,6 +122,7 @@ async function start() {
   await player.extractors.loadMulti(DefaultExtractors);
   await player.extractors.register(YoutubeExtractor);
   console.log(`Loaded ${player.extractors.size} music extractor(s).`);
+  console.log(`Audio encoder: ${PlayerOpusEncoder.type}; voice bitrate follows each channel (up to 128 kbps).`);
 
   const commands = loadCommands();
   const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);

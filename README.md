@@ -30,5 +30,5 @@ YouTube radio URLs are normalized to the video itself. Spotify and Apple Music l
 
 ## Audio quality
 
-YouTube playback requests the best available audio-only stream. A low-latency FFmpeg compressor is enabled to reduce loudness swings between tracks; it cannot make differently mastered recordings perfectly identical. Discord then re-encodes the audio for voice, and the voice channel's bitrate is the main quality limit. In Discord, edit the voice channel and raise **Bitrate** as high as the server allows. The bot logs the channel bitrate when a track starts. Also listen with Discord's noise suppression/audio processing disabled if music sounds muffled.
+YouTube playback requests the best available audio-only stream. FFmpeg EQ/compression/normalization filters are off to avoid extra processing; the bot keeps volume control and uses libopus at the voice channel's bitrate. This still requires one encode for Discord voice. Source mastering can make songs differ in loudness, and this configuration intentionally avoids dynamic normalization. The bot logs the selected channel limit at track start. Disable Discord noise suppression/audio processing when listening to music.
 # musicbotcuathuvadat
