@@ -13,7 +13,7 @@ const execute = async (interaction, player) => {
   
   const p = player.nodes.get(guildId);
   
-  if (!p || !p.node.isPlaying()) {
+  if (!p || !p.currentTrack) {
     return interaction.editReply({ content: 'No music is currently playing.' });
   }
   if (p.channel?.id !== member.voice.channel.id) {
@@ -24,7 +24,9 @@ const execute = async (interaction, player) => {
     return interaction.editReply({ content: 'Music is already playing.' });
   }
   
-  p.node.resume();
+  if (!p.node.resume()) {
+    return interaction.editReply({ content: 'I could not resume the current track. Try `/play` again.' });
+  }
   const embed = new EmbedBuilder()
     .setTitle('▶️ Resumed')
     .setDescription('Music has been resumed')
